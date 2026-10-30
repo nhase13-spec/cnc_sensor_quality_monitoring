@@ -80,7 +80,7 @@ python scripts/generate_reports.py
 pytest tests/ -q
 ```
 
-Stages: `audit`, `eda`, `features`, `classical`, `temporal`, `anomaly`, `explain`, `uncertainty`.
+Stages: `audit`, `eda`, `features`, `classical`, `temporal`, `anomaly`, `explain`, `uncertainty`, `bootstrap`, `robustness`.
 
 ## Model comparison (LOEO, actual run)
 
@@ -90,11 +90,20 @@ See `results/tables/model_comparison.csv`. Highlights:
 |------|------------|-------------------|
 | Tool condition | Logistic regression | 0.550 |
 | Visual inspection | Random forest / process baseline | 0.775 |
-| Machining finalized | Random forest | 0.875 |
+| Machining finalized | Random forest | 1.000 (explained by experiment length alone, see below) |
 
-Process-parameter-only baseline (tool condition): **0.388** balanced accuracy → sensor features help modestly under LOEO.
+Process-parameter-only baseline (tool condition): 0.388 balanced accuracy. Both this and the best sensor model (0.550) have bootstrap intervals that include 0.5 (chance), so **the data do not show that sensor features help for tool condition**.
 
 Temporal CNN: **skipped** — PyTorch not installed in the reference run (`results/metrics/temporal_results.json`).
+
+## Uncertainty and robustness (added after the first run)
+
+Run with `python run_pipeline.py --stage bootstrap` and `--stage robustness` (original results are not overwritten).
+
+* `results/tables/bootstrap_ci_classical.csv` - 95% bootstrap CIs (resampling experiments) for every stored OOF prediction set. With 14-18 experiments they are wide; a perfect model gets a degenerate [1, 1] interval, which is a bootstrap limitation, not certainty.
+* `results/tables/robustness_summary.csv`, `reports/robustness_report.md` - the same LOEO protocol with: `n_samples` removed; duration-scaling and program-counter features also removed; a fixed a-priori 18-feature motor-load set; in-fold SelectKBest (k = 10, 20, selection refitted per fold); and a diagnostic `n_samples`-only model. The re-run of the original 864-feature set reproduces the stored results exactly.
+* Findings: (1) for **machining finalised**, `n_samples` alone gives balanced accuracy 1.000 with Random Forest, identical to the full 864-feature model, so that result reflects run length, not sensor information; without it, 0.75-0.875 (RF without `n_samples`: 0.875 [0.62, 1.00]; the other variants have intervals reaching 0.5), and 0.75 once duration-scaling and program-counter features are also removed. (2) **Tool condition**: no variant is above chance - the best point estimate is 0.600 (interval includes 0.5) and several XGBoost/length-only variants fall below 0.5. (3) **Visual inspection** peaks at 0.825 with selected features but the interval is [0.50, 1.00] and the process-only baseline is 0.775. With 18 experiments none of these differences is established.
+* Explainability (`feature_importance_tool_condition*.png`, `shap_summary_tool_condition*.png`, `permutation_importance_tool_condition*.csv`): Brier-scored, channel-level permutation importance, reported both as in-sample model reliance (describes the model) and as out-of-fold importance (valid for unseen experiments), plus SHAP for the fitted model. The original version scored accuracy on training data (always 0) and mis-indexed the SHAP array; both are fixed and covered by tests. SHAP/reliance describe what the model uses, not evidence that it generalises.
 
 ## Key figures
 

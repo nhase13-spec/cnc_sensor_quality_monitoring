@@ -104,3 +104,26 @@ ablation_groups:
       - CommandPosition
       - CommandVelocity
       - CommandAcceleration
+
+# Robustness / uncertainty analyses (added after the first full run; original results are not overwritten).
+bootstrap:
+  n_boot: 2000
+  seed: 42
+  alpha: 0.05
+
+robustness:
+  models: [dummy, logistic_regression, random_forest, xgboost]
+  # Fixed a priori from domain reasoning (spindle/axis motor load reflects cutting force and wear);
+  # chosen BEFORE looking at robustness results and not tuned afterwards.
+  apriori_channels:
+    - S1_CurrentFeedback
+    - S1_OutputPower
+    - X1_CurrentFeedback
+    - Y1_CurrentFeedback
+    - X1_OutputPower
+    - Y1_OutputPower
+  apriori_stats: [mean, std, iqr]
+  kbest: [10, 20]
+  # Extensive (duration-scaling) feature suffixes and program-progress channels, removed in the strict variant.
+  extensive_suffixes: ["__energy", "__spectral_energy", "__wavelet_energy"]
+  progress_prefixes: ["M1_sequence_number", "M1_CURRENT_PROGRAM_NUMBER"]

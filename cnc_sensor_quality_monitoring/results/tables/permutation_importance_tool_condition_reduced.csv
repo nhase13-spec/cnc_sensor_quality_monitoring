@@ -1,0 +1,13 @@
+feature_set,channel,n_features,importance_mean,importance_std,kind
+reduced,Y1_CurrentFeedback,3,0.0561890410024915,0.013009963718055052,in_sample_reliance
+reduced,S1_CurrentFeedback,3,0.04527980223520475,0.00810536371568859,in_sample_reliance
+reduced,X1_CurrentFeedback,3,0.02680293983441113,0.007241988068291743,in_sample_reliance
+reduced,S1_OutputPower,3,0.026310010087203593,0.007215157899445504,in_sample_reliance
+reduced,Y1_OutputPower,3,0.019380448593920567,0.0037284546049722095,in_sample_reliance
+reduced,X1_OutputPower,3,0.01767096663801579,0.004717619732728471,in_sample_reliance
+reduced,S1_CurrentFeedback,3,0.018984496530985478,0.014685430248918604,out_of_fold
+reduced,Y1_CurrentFeedback,3,0.012941251269823761,0.022679431977318452,out_of_fold
+reduced,X1_OutputPower,3,-0.0024252155223380505,0.010587651726279084,out_of_fold
+reduced,S1_OutputPower,3,-0.002897683065040732,0.010975043960267418,out_of_fold
+reduced,X1_CurrentFeedback,3,-0.012466273205333259,0.01075042215001129,out_of_fold
+reduced,Y1_OutputPower,3,-0.013301615376634199,0.007040739612986358,out_of_fold

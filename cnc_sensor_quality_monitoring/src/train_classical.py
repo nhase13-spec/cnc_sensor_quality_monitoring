@@ -8,6 +8,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from sklearn.dummy import DummyClassifier
+from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -88,14 +89,27 @@ def build_model(model_name: str, config: dict, class_weight: str | None = "balan
     raise ValueError(model_name)
 
 
-def make_pipeline(model) -> Pipeline:
-    return Pipeline(
-        steps=[
-            ("imputer", SimpleImputer(strategy="median")),
-            ("scaler", StandardScaler()),
-            ("model", model),
-        ]
-    )
+def _safe_f_classif(X: np.ndarray, y: np.ndarray) -> np.ndarray:
+    """ANOVA F-score that returns 0 (not NaN) for constant columns inside a training fold."""
+    with np.errstate(all="ignore"):
+        scores, _ = f_classif(X, y)
+    return np.nan_to_num(scores, nan=0.0, posinf=0.0, neginf=0.0)
+
+
+def make_pipeline(model, select_k: int | None = None) -> Pipeline:
+    """Impute -> scale -> (optional in-fold SelectKBest) -> model.
+
+    ``select_k`` keeps the selection *inside* the pipeline so that it is re-fitted on the training
+    experiments of every fold only (selecting on all 18 experiments first would leak labels).
+    """
+    steps: list[tuple[str, Any]] = [
+        ("imputer", SimpleImputer(strategy="median")),
+        ("scaler", StandardScaler()),
+    ]
+    if select_k is not None:
+        steps.append(("select", SelectKBest(score_func=_safe_f_classif, k=select_k)))
+    steps.append(("model", model))
+    return Pipeline(steps=steps)
 
 
 def grouped_cv_train(
@@ -105,6 +119,7 @@ def grouped_cv_train(
     model_name: str,
     config: dict,
     progress_label: str | None = None,
+    select_k: int | None = None,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
     splitter = get_group_splitter(config["validation"]["primary"], groups.nunique())
     fold_frames: list[pd.DataFrame] = []
@@ -113,7 +128,7 @@ def grouped_cv_train(
     for fold_idx, (train_idx, test_idx) in enumerate(splitter.split(X, y, groups)):
         if progress_label and (fold_idx == 0 or fold_idx == n_folds - 1 or (fold_idx + 1) % 6 == 0):
             print(f"    {progress_label}: fold {fold_idx + 1}/{n_folds}", flush=True)
-        pipeline = make_pipeline(build_model(model_name, config))
+        pipeline = make_pipeline(build_model(model_name, config), select_k=select_k)
         pipeline.fit(X.iloc[train_idx], y.iloc[train_idx])
         prob = pipeline.predict_proba(X.iloc[test_idx])[:, 1]
         pred = pipeline.predict(X.iloc[test_idx])
