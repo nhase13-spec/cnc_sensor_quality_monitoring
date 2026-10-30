@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.env
+*.egg-info/
+dist/
+build/
+
+# ML artifact dirs (regenerate via pipeline)
+models/
+mlruns/
+
+# Processed features are rebuilt by the pipeline
+data/processed/
+
+# IDE
+.idea/
+.vscode/

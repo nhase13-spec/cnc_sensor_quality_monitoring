@@ -1,0 +1,14 @@
+,value
+n_experiments,18
+n_sensor_rows_total,25286
+n_sensor_columns,50
+experiment_lengths,"{1: 1055, 2: 1668, 3: 1521, 4: 532, 5: 462, 6: 1296, 7: 565, 8: 605, 9: 740, 10: 1301, 11: 2314, 12: 2276, 13: 2233, 14: 2332, 15: 1381, 16: 602, 17: 2150, 18: 2253}"
+sampling_interval_s_documented,0.1
+tool_condition_distribution,"{'worn': 10, 'unworn': 8}"
+machining_completed_distribution,"{'yes': 14, 'no': 4}"
+visual_inspection_distribution,"{'yes': 10, nan: 4, 'no': 4}"
+feedrate_levels,"{3: 6, 6: 5, 20: 5, 15: 1, 12: 1}"
+clamp_pressure_levels,"{4.0: 9, 3.0: 6, 2.5: 3}"
+missing_values_train,"{'experiment_id': 0, 'material': 0, 'feedrate': 0, 'clamp_pressure': 0, 'tool_condition': 0, 'machining_finalized': 0, 'passed_visual_inspection': 4}"
+duplicate_experiment_ids,0
+leakage_risks,"['Random row-level splits would leak temporal structure within experiments.', 'Process parameters (feedrate, clamp pressure) correlate with experimental design and must not substitute for grouped validation.', 'Visual inspection labels are missing for incomplete runs and must be excluded from that task.']"

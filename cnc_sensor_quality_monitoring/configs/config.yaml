@@ -1,0 +1,106 @@
+project:
+  name: cnc_sensor_quality_monitoring
+  random_seed: 42
+
+paths:
+  # Dataset lives at repository root: Model/data/raw/ (no Kaggle download required)
+  raw_dir: ../data/raw
+  interim_dir: data/interim
+  processed_dir: data/processed
+  figures_dir: results/figures
+  tables_dir: results/tables
+  metrics_dir: results/metrics
+  models_dir: models
+  experiments_dir: experiments
+
+data:
+  train_file: train.csv
+  experiment_pattern: "experiment_{:02d}.csv"
+  experiment_id_col: "No"
+  sampling_interval_s: 0.1
+  machining_completed_col: machining_finalized
+  tool_condition_col: tool_condition
+  visual_inspection_col: passed_visual_inspection
+  process_cols:
+    - feedrate
+    - clamp_pressure
+  invalid_rules:
+    feedrate_flag_col: M1_CURRENT_FEEDRATE
+    feedrate_flag_value: 50
+    x_position_flag_col: X1_ActualPosition
+    x_position_flag_value: 198
+    program_number_col: M1_CURRENT_PROGRAM_NUMBER
+    program_number_valid: 0
+  active_machining_labels:
+    - "Layer 1 Up"
+    - "Layer 1 Down"
+    - "Layer 2 Up"
+    - "Layer 2 Down"
+    - "Layer 3 Up"
+    - "Layer 3 Down"
+
+features:
+  use_active_machining_only: true
+  frequency_min_samples: 64
+  wavelet_name: db4
+
+validation:
+  primary: leave_one_experiment_out
+  n_splits: 18
+
+models:
+  classical:
+    logistic_regression:
+      C: 1.0
+      max_iter: 2000
+    random_forest:
+      n_estimators: 300
+      max_depth: 5
+      min_samples_leaf: 2
+    xgboost:
+      n_estimators: 200
+      max_depth: 3
+      learning_rate: 0.1
+      subsample: 0.9
+      colsample_bytree: 0.9
+  temporal:
+    enabled: true
+    sequence_length: 128
+    batch_size: 16
+    max_epochs: 40
+    learning_rate: 0.001
+    patience: 8
+
+tasks:
+  tool_condition:
+    enabled: true
+    target_col: tool_condition
+    positive_class: worn
+  visual_inspection:
+    enabled: true
+    target_col: passed_visual_inspection
+    positive_class: "yes"
+    require_machining_completed: true
+  machining_completed:
+    enabled: true
+    target_col: machining_finalized
+    positive_class: "yes"
+
+ablation_groups:
+  process_only:
+    - feedrate
+    - clamp_pressure
+  spindle:
+    prefix: S1_
+  axis_current:
+    suffixes:
+      - CurrentFeedback
+      - OutputCurrent
+  axis_motion:
+    contains:
+      - ActualPosition
+      - ActualVelocity
+      - ActualAcceleration
+      - CommandPosition
+      - CommandVelocity
+      - CommandAcceleration
