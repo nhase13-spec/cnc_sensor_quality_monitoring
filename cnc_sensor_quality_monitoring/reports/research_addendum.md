@@ -3,7 +3,8 @@
 Scope: reviewer-requested controlled experiments (correlation filtering, training-fold-only PCA, physically selected
 sensor groups, grouped importance). All baseline experiments and result files are unchanged; everything new is written
 to new files (`results/tables/extended_*`, `results/figures/extended_*`, `results/metrics/extended_*`).
-Reproduce with `python run_pipeline.py --stage extended --reuse-features` (not part of `--stage all`).
+These generated files are not committed; reproduce them with `python run_pipeline.py --stage extended --reuse-features`
+(not part of `--stage all`).
 
 **Status of every number below: exploratory and hypothesis-generating.** 18 experiments (14 for visual inspection;
 only 4 negatives), one row per experiment, leave-one-experiment-out (LOEO). 14 feature variants x 3 models x 3 tasks

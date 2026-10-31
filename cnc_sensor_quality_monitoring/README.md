@@ -107,7 +107,7 @@ Run with `python run_pipeline.py --stage bootstrap` and `--stage robustness` (or
 
 ## Controlled extensions (added after reviewer feedback)
 
-Run with `python run_pipeline.py --stage extended --reuse-features` (explicit stage; not part of `--stage all`; ~25 min). Original results are untouched; new files are named `extended_*`. Full discussion: `reports/research_addendum.md`.
+Run with `python run_pipeline.py --stage extended --reuse-features` (explicit stage; not part of `--stage all`; ~25 min). Original results are untouched; new files are named `extended_*` and are generated locally (not committed to the repository). Full discussion: `reports/research_addendum.md`.
 
 * In-fold correlation filter (|r| 0.95 / 0.80), PCA after training-fold standardisation (k = 1, 2, 3, 5, 8, capped at n_train // 2), physically selected sensor groups and the a-priori 18-feature set, all on the length-free 712-feature base, evaluated with LOEO on identical folds; balanced accuracy, macro F1, pooled confusion matrices, bootstrap CIs, paired differences versus the base, jackknife stability, and out-of-fold grouped permutation importance / grouped SHAP.
 * Headline: none of the filtering, PCA or sensor-group variants reliably improves on the 712-feature base (3 of 114 paired intervals exclude 0, all in the unfavourable direction); PCA made fold models less stable. Treat every comparison as hypothesis-generating (14-18 experiments).
