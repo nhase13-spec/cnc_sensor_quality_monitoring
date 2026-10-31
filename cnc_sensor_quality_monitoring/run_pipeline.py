@@ -144,7 +144,7 @@ def configure_warnings() -> None:
 def main() -> None:
     configure_warnings()
     parser = argparse.ArgumentParser()
-    parser.add_argument("--stage", default="all", choices=["all", "audit", "eda", "features", "classical", "temporal", "anomaly", "explain", "uncertainty", "bootstrap", "robustness"])
+    parser.add_argument("--stage", default="all", choices=["all", "audit", "eda", "features", "classical", "temporal", "anomaly", "explain", "uncertainty", "bootstrap", "robustness", "extended"])
     parser.add_argument(
         "--fast",
         action="store_true",
@@ -173,7 +173,7 @@ def main() -> None:
         print("EDA figures saved.")
     feature_df = None
     feature_cache = project_root() / config["paths"]["processed_dir"] / "experiment_features.csv"
-    need_features = args.stage in {"all", "features", "classical", "temporal", "anomaly", "explain", "uncertainty", "robustness"}
+    need_features = args.stage in {"all", "features", "classical", "temporal", "anomaly", "explain", "uncertainty", "robustness", "extended"}
     if need_features:
         if args.reuse_features and feature_cache.is_file():
             feature_df = pd.read_csv(feature_cache)
@@ -215,6 +215,11 @@ def main() -> None:
 
         print("Robustness experiments (no n_samples, reduced feature sets, in-fold selection)...", flush=True)
         run_robustness(feature_df, config)
+    if args.stage == "extended" and feature_df is not None:  # explicit only: not part of "all"
+        from src.extended_analysis import run_extended
+
+        print("Extended controlled experiments (correlation filter, PCA, physical groups, grouped importance)...", flush=True)
+        run_extended(feature_df, config)
     if args.stage in {"all", "bootstrap"}:
         from src.bootstrap_ci import run_bootstrap
 

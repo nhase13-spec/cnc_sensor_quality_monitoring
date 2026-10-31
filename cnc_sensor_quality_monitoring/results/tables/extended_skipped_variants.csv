@@ -1,0 +1,2 @@
+task,variant,reason
+visual_inspection,base_712_pca8,"k=8 > cap 6 (= n_train_experiments//2, n_train=13)"

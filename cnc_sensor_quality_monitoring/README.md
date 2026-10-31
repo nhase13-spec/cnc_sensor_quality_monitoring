@@ -105,6 +105,15 @@ Run with `python run_pipeline.py --stage bootstrap` and `--stage robustness` (or
 * Findings: (1) for **machining finalised**, `n_samples` alone gives balanced accuracy 1.000 with Random Forest, identical to the full 864-feature model, so that result reflects run length, not sensor information; without it, 0.75-0.875 (RF without `n_samples`: 0.875 [0.62, 1.00]; the other variants have intervals reaching 0.5), and 0.75 once duration-scaling and program-counter features are also removed. (2) **Tool condition**: no variant is above chance - the best point estimate is 0.600 (interval includes 0.5) and several XGBoost/length-only variants fall below 0.5. (3) **Visual inspection** peaks at 0.825 with selected features but the interval is [0.50, 1.00] and the process-only baseline is 0.775. With 18 experiments none of these differences is established.
 * Explainability (`feature_importance_tool_condition*.png`, `shap_summary_tool_condition*.png`, `permutation_importance_tool_condition*.csv`): Brier-scored, channel-level permutation importance, reported both as in-sample model reliance (describes the model) and as out-of-fold importance (valid for unseen experiments), plus SHAP for the fitted model. The original version scored accuracy on training data (always 0) and mis-indexed the SHAP array; both are fixed and covered by tests. SHAP/reliance describe what the model uses, not evidence that it generalises.
 
+## Controlled extensions (added after reviewer feedback)
+
+Run with `python run_pipeline.py --stage extended --reuse-features` (explicit stage; not part of `--stage all`; ~25 min). Original results are untouched; new files are named `extended_*`. Full discussion: `reports/research_addendum.md`.
+
+* In-fold correlation filter (|r| 0.95 / 0.80), PCA after training-fold standardisation (k = 1, 2, 3, 5, 8, capped at n_train // 2), physically selected sensor groups and the a-priori 18-feature set, all on the length-free 712-feature base, evaluated with LOEO on identical folds; balanced accuracy, macro F1, pooled confusion matrices, bootstrap CIs, paired differences versus the base, jackknife stability, and out-of-fold grouped permutation importance / grouped SHAP.
+* Headline: none of the filtering, PCA or sensor-group variants reliably improves on the 712-feature base (3 of 114 paired intervals exclude 0, all in the unfavourable direction); PCA made fold models less stable. Treat every comparison as hypothesis-generating (14-18 experiments).
+* Caveat: spindle position features track experiment length even after the earlier filters, so `machining_completed` remains length-contaminated (`extended_spindle_position_diagnostic.csv`).
+* Tests (`tests/test_extended.py`) cover leakage prevention (in-fold fitting, label-free filter, noise canary with a deliberately leaky selector, identical folds, no ids/targets/length in features, PCA cap) and reproducibility (exact reproduction of stored results, deterministic reruns, SHAP additivity).
+
 ## Key figures
 
 - `results/figures/label_distributions.png`
